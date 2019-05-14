@@ -18,7 +18,7 @@ export class Server {
         this.httpServer = http.createServer((request, response) => this.handler(request, response))
         const configuration = vscode.workspace.getConfiguration('latex-workshop')
         const viewerPort = configuration.get('viewer.pdf.internal.port') as number
-        const viewerAddress = configuration.get('latex-workshop.viewer.pdf.internal.address') as string
+        const viewerAddress = configuration.get('viewer.pdf.internal.address') as string
         this.httpServer.listen(viewerPort, viewerAddress, undefined, (err: Error) => {
             if (err) {
                 this.extension.logger.addLogMessage(`Error creating LaTeX Workshop http server: ${err}.`)
