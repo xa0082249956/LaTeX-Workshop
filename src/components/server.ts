@@ -23,8 +23,8 @@ export class Server {
         const usehttps = configuration.get('viewer.pdf.internal.usehttps') as boolean
         if (usehttps) {
             const options = {
-                key: configuration.get('viewer.pdf.internal.https.keyPath') as string,
-                cert: configuration.get('viewer.pdf.internal.https.certPath') as string
+                key: fs.readFileSync(configuration.get('viewer.pdf.internal.https.keyPath') as string),
+                cert: fs.readFileSync(configuration.get('viewer.pdf.internal.https.certPath') as string)
             }
             this.server = https.createServer(options, (request, response) => this.handler(request, response))
         } else {
