@@ -829,6 +829,11 @@
           "default": false,
           "markdownDescription": "When set to true, the viewer will use https https connection, otherwise http is used."
         },
+        "latex-workshop.viewer.pdf.internal.server": {
+          "type": "string",
+          "default": "127.0.0.1",
+          "markdownDescription": "The real address that server using."
+        },
         "latex-workshop.viewer.pdf.internal.https.keyPath": {
           "type": "string",
           "default": "",

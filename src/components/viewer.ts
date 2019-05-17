@@ -21,11 +21,14 @@ export class Viewer {
     clients: {[key: string]: Client[]} = {}
     positions = {}
     protocol: string
+    server: string
 
     constructor(extension: Extension) {
         this.extension = extension
         const configuration = vscode.workspace.getConfiguration('latex-workshop')
         // 或许复杂了，可以从 extension.server.server 取东西？
+        this.server = configuration.get('viewer.pdf.internal.server') as string
+        // this.server = this.server
         if (configuration.get('viewer.pdf.internal.usehttps') as boolean) {
             this.protocol = 'https'
         } else {
@@ -81,7 +84,7 @@ export class Viewer {
         // vscode.URI.parse and pdfjs viewer automatically call decodeURIComponent.
         // So, to pass the encoded path of a pdf file to the http server,
         // we have to call encodeURIComponent three times! 3 - 2 = 1 !
-        const url = `${this.protocol}://${this.extension.server.address}/viewer.html?file=/pdf:${encodeURIComponent(encodeURIComponent(encodeURIComponent(pdfFile)))}`
+        const url = `${this.protocol}://${this.server}:${this.extension.server.port}/viewer.html?file=/pdf:${encodeURIComponent(encodeURIComponent(encodeURIComponent(pdfFile)))}`
         this.extension.logger.addLogMessage(`Serving PDF file at ${url}`)
         return url
     }
@@ -131,7 +134,7 @@ export class Viewer {
         // pdfjs viewer automatically call decodeURIComponent.
         // So, to pass the encoded path of a pdf file to the http server,
         // we have to call encodeURIComponent two times! 2 - 1 = 1 !
-        const url = `${this.protocol}://${this.extension.server.address}/viewer.html?incode=1&file=/pdf:${uri.authority ? `\\\\${uri.authority}` : ''}${encodeURIComponent(encodeURIComponent(uri.fsPath))}`
+        const url = `${this.protocol}://${this.server}:${this.extension.server.port}/viewer.html?incode=1&file=/pdf:${uri.authority ? `\\\\${uri.authority}` : ''}${encodeURIComponent(encodeURIComponent(uri.fsPath))}`
         return `
             <!DOCTYPE html><html><head></head>
             <body><iframe id="preview-panel" class="preview-panel" src="${url}" style="position:absolute; border: none; left: 0; top: 0; width: 100%; height: 100%;">

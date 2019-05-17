@@ -13,6 +13,7 @@ export class Server {
     server: https.Server | http.Server
     wsServer: ws.Server
     address: string
+    port: number
 
     constructor(extension: Extension) {
         this.extension = extension
@@ -36,11 +37,13 @@ export class Server {
                 const {address, port} = this.server.address() as AddressInfo
                 if (address.indexOf(':') > -1) {
                     // the colon is reserved in URL to separate IPv4 address from port number. IPv6 address needs to be enclosed in square brackets when used in URL
-                    this.address = `[${address}]:${port}`
+                    this.address = `[${address}]`
+                    this.port = port
                 } else {
-                    this.address = `${address}:${port}`
+                    this.address = `${address}`
+                    this.port = port
                 }
-                this.extension.logger.addLogMessage(`Server created on ${this.address}`)
+                this.extension.logger.addLogMessage(`Server created on ${this.address}:${this.port}`)
             }
         })
         this.server.on('error', (err) => {
