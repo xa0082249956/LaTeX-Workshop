@@ -824,6 +824,21 @@
           "default": "0",
           "markdownDescription": "Define the port to listen on for communicating with the internal viewer. The default value \"0\" means the port is chosen randomly by the application."
         },
+        "latex-workshop.viewer.pdf.internal.usehttps": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "When set to true, the viewer will use https https connection, otherwise http is used."
+        },
+        "latex-workshop.viewer.pdf.internal.https.keyPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "The path to the key of https server."
+        },
+        "latex-workshop.viewer.pdf.internal.https.certPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "The path to the certficate of https server."
+        },
         "latex-workshop.view.pdf.external.command": {
           "type": "object",
           "default": {

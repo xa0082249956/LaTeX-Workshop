@@ -1,4 +1,5 @@
 import * as http from 'http'
+import * as https from 'https'
 import * as ws from 'ws'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -9,21 +10,30 @@ import {AddressInfo} from 'net'
 
 export class Server {
     extension: Extension
-    httpServer: http.Server
+    server: https.Server | http.Server
     wsServer: ws.Server
     address: string
 
     constructor(extension: Extension) {
         this.extension = extension
-        this.httpServer = http.createServer((request, response) => this.handler(request, response))
         const configuration = vscode.workspace.getConfiguration('latex-workshop')
         const viewerPort = configuration.get('viewer.pdf.internal.port') as number
         const viewerAddress = configuration.get('viewer.pdf.internal.address') as string
-        this.httpServer.listen(viewerPort, viewerAddress, undefined, (err: Error) => {
+        const usehttps = configuration.get('viewer.pdf.internal.usehttps') as boolean
+        if (usehttps) {
+            const options = {
+                key: configuration.get('viewer.pdf.internal.https.keyPath') as string,
+                cert: configuration.get('viewer.pdf.internal.https.certPath') as string
+            }
+            this.server = https.createServer(options, (request, response) => this.handler(request, response))
+        } else {
+            this.server = http.createServer((request, response) => this.handler(request, response))
+        }
+        this.server.listen(viewerPort, viewerAddress, undefined, (err: Error) => {
             if (err) {
                 this.extension.logger.addLogMessage(`Error creating LaTeX Workshop http server: ${err}.`)
             } else {
-                const {address, port} = this.httpServer.address() as AddressInfo
+                const {address, port} = this.server.address() as AddressInfo
                 if (address.indexOf(':') > -1) {
                     // the colon is reserved in URL to separate IPv4 address from port number. IPv6 address needs to be enclosed in square brackets when used in URL
                     this.address = `[${address}]:${port}`
@@ -33,10 +43,10 @@ export class Server {
                 this.extension.logger.addLogMessage(`Server created on ${this.address}`)
             }
         })
-        this.httpServer.on('error', (err) => {
+        this.server.on('error', (err) => {
             this.extension.logger.addLogMessage(`Error creating LaTeX Workshop http server: ${err}.`)
         })
-        this.wsServer = new ws.Server({server: this.httpServer})
+        this.wsServer = new ws.Server({server: this.server})
         this.wsServer.on('connection', (websocket) => {
             websocket.on('message', (msg: string) => this.extension.viewer.handler(websocket, msg))
             websocket.on('close', () => this.extension.viewer.handler(websocket, '{"type": "close"}'))
